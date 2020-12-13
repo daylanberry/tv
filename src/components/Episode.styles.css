@@ -1,0 +1,14 @@
+.ep-container {
+  display: flex;
+}
+
+.ep-image {
+  width: 200px;
+  height: 150px;
+  padding: 10px;
+}
+
+.ep-desc {
+  padding-left: 10px;
+  padding-top: 10px;
+}
