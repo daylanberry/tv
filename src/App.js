@@ -73,8 +73,8 @@ function App() {
   const pickShowByNameOrRandomly = (random, name='') => {
     setError('')
 
-    let endpoint = !random && name.length ? `http://api.tvmaze.com/singlesearch/shows?q=${name}&embed=episodes` :
-    `http://api.tvmaze.com/shows/${randomNumber()}?embed=episodes`
+    let endpoint = !random && name.length ? `https://api.tvmaze.com/singlesearch/shows?q=${name}&embed=episodes` :
+    `https://api.tvmaze.com/shows/${randomNumber()}?embed=episodes`
 
     return axios.get(endpoint)
       .then(res => {
@@ -141,3 +141,4 @@ function App() {
 }
 
 export default App;
+
