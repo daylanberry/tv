@@ -76,7 +76,12 @@ function App() {
     let endpoint = !random && name.length ? `http://api.tvmaze.com/singlesearch/shows?q=${name}&embed=episodes` :
     `http://api.tvmaze.com/shows/${randomNumber()}?embed=episodes`
 
-    return axios.get(endpoint)
+    return axios.get(endpoint, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+      }
+    })
       .then(res => {
 
         const { id, name, genres, premiered, summary, image } = res.data;
