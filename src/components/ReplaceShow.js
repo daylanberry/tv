@@ -38,7 +38,7 @@ const ReplaceShow = ({handleSeasonChange, handleEpisodesChange, totalSeasons, to
     e.preventDefault()
     let replacementShow = replacement.split(' ').join('-')
 
-    axios.get(`http://api.tvmaze.com/singlesearch/shows?q=${replacementShow}&embed=episodes`)
+    axios.get(`https://api.tvmaze.com/singlesearch/shows?q=${replacementShow}&embed=episodes`)
       .then(res => {
         let episodes = res.data._embedded.episodes
         let replacementEpisode = episodes.find((ep) => (
