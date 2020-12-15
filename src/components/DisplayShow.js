@@ -25,8 +25,10 @@ const DisplayShow = ({show: {name, genres, premiered, summary, image}}) => {
       </div>
       <div className='show-info'>
         <h3>{name}</h3>
-        {genreRenderer()}
-        <span>Premiered on {moment(premiered).format('MMM, D, Y')}</span>
+        <div className='season-desc'>
+          {genreRenderer()}
+          <span>Premiered on {moment(premiered).format('MMM, D, Y')}</span>
+        </div>
         <div>
           {text}
         </div>

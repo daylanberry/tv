@@ -12,3 +12,11 @@
   padding-left: 10px;
   padding-top: 10px;
 }
+
+.ep-info {
+  font-weight: 200;
+}
+
+.ep-body-text {
+  margin-top: 5px;
+}

@@ -22,19 +22,14 @@ function App() {
   });
   const [episodes, setEpisodes] = useState([]);
 
-  // used for drop down component
-  const [dropdownValues, setDropdownValues] = useState({
-    currentSeason: 1,
-    currentEpisode: 1,
-    totalSeasons: null,
-    totalEpisodes: null
-  })
-
   // This state is used to display dropdown
   const [currentSeason, setCurrentSeason] = useState(1)
   const [currentEpisode, setCurrentEpisode] = useState(1)
-  const [totalSeasons, setTotalSeasons] = useState(null);
-  const [totalEpisodes, setTotalEpisodes] = useState(null);
+  const [totalSeasons, setTotalSeasons] = useState([]);
+  const [totalEpisodes, setTotalEpisodes] = useState([]);
+
+  const [error, setError] = useState('')
+
 
   useEffect(() => {
     pickShowByNameOrRandomly(true)
@@ -42,6 +37,7 @@ function App() {
 
   // Handles the current season in the dropdown
   const handleCurrentSeasonChange = (e) => {
+    setError('')
     let currentSeason = parseInt(e.target.value)
 
     setCurrentSeason(currentSeason)
@@ -50,12 +46,14 @@ function App() {
 
   // Handles the current episode in the dropdown
   const handleDropdownEpisodes = (e) => {
+    setError('')
     setCurrentEpisode(parseInt(e.target.value))
   }
 
   // This will dynamically populate number of seasons along with episodes for chosen season
   const handleTotalEpisodesWithSeasons = (currentSeason, episodes) => {
-    const totalEpisodes = episodes.filter(ep => ep.season === currentSeason).length
+    const totalEpisodes = episodes.filter(ep => ep.season === currentSeason).map(filteredEp => filteredEp.number)
+
     setTotalEpisodes(totalEpisodes)
   }
 
@@ -64,8 +62,16 @@ function App() {
     return Math.floor(Math.random() * 10000)
   }
 
+  // This function returns the array of all the seasons numerically to account for skipped seasons
+  const createSeasonArray = (episodes) => {
+    let seasonArray = Array.from(new Set(episodes.map(ep => ep.season)))
+
+    return seasonArray
+  }
+
 
   const pickShowByNameOrRandomly = (random, name='') => {
+    setError('')
 
     let endpoint = !random && name.length ? `http://api.tvmaze.com/singlesearch/shows?q=${name}&embed=episodes` :
     `http://api.tvmaze.com/shows/${randomNumber()}?embed=episodes`
@@ -78,14 +84,17 @@ function App() {
         setShow({...show, id, name, genres, premiered, summary, image, loaded: true})
 
         let episodes = res.data._embedded.episodes
+        let seasonArray = createSeasonArray(episodes)
+
         setEpisodes(episodes)
         handleTotalEpisodesWithSeasons(1, episodes)
-        setTotalSeasons(episodes[episodes.length - 1].season)
+        setTotalSeasons(seasonArray)
       })
       .catch(err => console.log(err))
   }
 
   const handleSearchChange = (e) => {
+    setError('')
     setSearchedName(e.target.value)
   }
 
@@ -95,6 +104,16 @@ function App() {
     pickShowByNameOrRandomly(false, name)
   }
 
+  const replaceEpisode = (newShowObj) => {
+
+    let updatedEpisodes = episodes.map((ep, i) => {
+      if (ep.season === currentSeason && ep.number === currentEpisode) {
+        return newShowObj
+      }
+      return ep
+    })
+    setEpisodes(updatedEpisodes)
+  }
 
 
   if (!show.name) return <Loader />
@@ -105,11 +124,17 @@ function App() {
       {show.loaded && <DisplayShow show={show}/>}
 
       <ReplaceShow
-        dropdownValues={dropdownValues}
         handleSeasonChange={handleCurrentSeasonChange}
         handleEpisodesChange={handleDropdownEpisodes}
-      />
+        totalSeasons={totalSeasons}
+        totalEpisodes={totalEpisodes}
+        replaceEpisode={replaceEpisode}
+        currentEpisode={currentEpisode}
+        currentSeason={currentSeason}
+        error={error}
+        setError={setError}
 
+      />
       <SeasonList episodes={episodes}/>
     </div>
   );

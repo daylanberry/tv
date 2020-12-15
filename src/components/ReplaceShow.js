@@ -1,21 +1,66 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
+import './ReplaceShow.styles.css';
 
-const ReplaceShow = ({dropdownValues, handleSeasonChange, handleEpisodesChange}) => {
+import axios from 'axios';
 
-  // const {totalSeason, totalSeasonEpisodes} = dropdownValues;
+const ReplaceShow = ({handleSeasonChange, handleEpisodesChange, totalSeasons, totalEpisodes, replaceEpisode, currentEpisode, currentSeason, error, setError}) => {
 
-  const renderSeasons = () => {
+  const [replacement, setReplacement] = useState('')
 
+  const handleReplacementChange = (e) => {
+    setError('')
+    setReplacement(e.target.value)
   }
 
-  const renderEpisode = () => {
+
+  const rendererEpisodes = () => {
+    return (
+      <>
+        {totalEpisodes.map((ep, i) => (
+          <option key={i} value={ep}>Episode {ep}</option>
+        ))}
+      </>
+    )
+  }
+
+  const renderSeasons = () => {
+    return (
+      <>
+        {totalSeasons.map((season, i) => (
+          <option key={i} value={season}>Season {season}</option>
+        ))}
+      </>
+    )
+  }
+
+  const submitReplacement = (e) => {
+    e.preventDefault()
+    let replacementShow = replacement.split(' ').join('-')
+
+    axios.get(`http://api.tvmaze.com/singlesearch/shows?q=${replacementShow}&embed=episodes`)
+      .then(res => {
+        let episodes = res.data._embedded.episodes
+        let replacementEpisode = episodes.find((ep) => (
+          ep.number === currentEpisode && ep.season === currentSeason
+        ))
+
+        if (!replacementEpisode) {
+          return setError('There is no matching season/episode for this show')
+        }
+
+        replaceEpisode(replacementEpisode)
+      })
+        .catch(err => {
+          setError(`There is no show matching for ${replacement}`)
+          setReplacement('')
+        })
 
   }
 
   return (
     <div>
-      <Form inline>
+      <Form inline onSubmit={submitReplacement}>
         <Form.Label className="my-1 mr-2" htmlFor="inlineFormCustomSelectPref">
           Replace
         </Form.Label>
@@ -26,10 +71,7 @@ const ReplaceShow = ({dropdownValues, handleSeasonChange, handleEpisodesChange})
           custom
           onChange={handleSeasonChange}
         >
-          <option value={1}>Season 1</option>
-          <option value={2}>Season 2</option>
-          <option value={3}>Season 3</option>
-          <option value={4}>Season 4</option>
+          {renderSeasons()}
         </Form.Control>
         <Form.Control
           as="select"
@@ -38,15 +80,19 @@ const ReplaceShow = ({dropdownValues, handleSeasonChange, handleEpisodesChange})
           custom
           onChange={handleEpisodesChange}
         >
-          <option value="0">Episode 1</option>
-          <option value="1">One</option>
-          <option value="2">Two</option>
-          <option value="3">Three</option>
+          {rendererEpisodes()}
         </Form.Control>
+        <span>with</span>
+        <input
+          type='text'
+          className='replace-input'
+          onChange={handleReplacementChange}
+        />
         <Button type="submit" className="my-1">
           Replace
         </Button>
       </Form>
+      {error.length > 0 && <p >{error}</p>}
     </div>
   )
 }

@@ -5,7 +5,7 @@ import SeasonListHeader from './SeasonListHeader';
 import naImage from '../assets/naImage.jpg'
 import './Episode.styles.css'
 
-const Episode = ({ep}) => {
+const Episode = ({ep, numOfEpisodesInSeason}) => {
 
   let description = ep.summary ? ep.summary.replace(/<[^>]+>/g, '') : '';
   let text = description.length < 200 ? description : description.slice(0, 190) + '...'
@@ -16,7 +16,7 @@ const Episode = ({ep}) => {
     <>
       {
         ep.number === 1 && (
-          <SeasonListHeader sNum={ep.season} epNum={ep.number} aired={aired}/>
+          <SeasonListHeader sNum={ep.season} numOfEpisodes={numOfEpisodesInSeason} aired={aired}/>
         )
       }
       <div className='ep-container'>
@@ -28,11 +28,11 @@ const Episode = ({ep}) => {
         </div>
         <div className='ep-desc'>
           <h6>{ep.name}</h6>
-          <span className='season-info'>
+          <span className='ep-info'>
             Season {ep.season} | Episode: {ep.number} | {aired}
           </span>
 
-          <div>
+          <div className='ep-body-text'>
             {text}
           </div>
         </div>
