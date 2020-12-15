@@ -15,3 +15,8 @@
   font-weight: 200;
   margin-bottom: 15px;
 }
+
+.main-img {
+  max-width: 230px;
+  max-height: 295px;
+}

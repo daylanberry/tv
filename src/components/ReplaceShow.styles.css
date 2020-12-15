@@ -3,3 +3,8 @@
   margin-left: 10px;
   margin-right: 10px;
 }
+
+.replace-error {
+  background-color: 'red';
+  border-style: solid;
+}

@@ -2,3 +2,8 @@
   padding: 10px;
   padding-left: 20px;
 }
+
+.page-error {
+  text-align: center;
+  margin: auto;
+}

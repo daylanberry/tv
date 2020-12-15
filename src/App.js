@@ -8,6 +8,10 @@ import SeasonList from './components/SeasonList';
 import ReplaceShow from './components/ReplaceShow';
 import Loader from './components/Loader';
 
+import { Alert } from 'react-bootstrap'
+
+import * as helpers from './helpers';
+
 function App() {
 
   const [searchedName, setSearchedName] = useState('');
@@ -26,18 +30,36 @@ function App() {
   const [currentSeason, setCurrentSeason] = useState(1)
   const [currentEpisode, setCurrentEpisode] = useState(1)
   const [totalSeasons, setTotalSeasons] = useState([]);
+  // will dynamically set the number of episodes according to current season
   const [totalEpisodes, setTotalEpisodes] = useState([]);
 
-  const [error, setError] = useState('')
+  const [errors, setErrors] = useState({
+    replaceSearchError: '',
+    pageError: ''
+  });
+
+  const { replaceSearchError, pageError } = errors;
 
 
   useEffect(() => {
     pickShowByNameOrRandomly(true)
   }, []);
 
+  const handleTypeError = (name, err) => {
+    setErrors({...errors, [name]: err})
+  }
+
+  const clearErrors = () => {
+    setErrors({
+      ...errors,
+      replaceSearchError: '',
+      pageError: ''
+    })
+  }
+
   // Handles the current season in the dropdown
   const handleCurrentSeasonChange = (e) => {
-    setError('')
+    clearErrors()
     let currentSeason = parseInt(e.target.value)
 
     setCurrentSeason(currentSeason)
@@ -46,7 +68,7 @@ function App() {
 
   // Handles the current episode in the dropdown
   const handleDropdownEpisodes = (e) => {
-    setError('')
+    clearErrors()
     setCurrentEpisode(parseInt(e.target.value))
   }
 
@@ -58,23 +80,11 @@ function App() {
   }
 
 
-  const randomNumber = () => {
-    return Math.floor(Math.random() * 10000)
-  }
-
-  // This function returns the array of all the seasons numerically to account for skipped seasons
-  const createSeasonArray = (episodes) => {
-    let seasonArray = Array.from(new Set(episodes.map(ep => ep.season)))
-
-    return seasonArray
-  }
-
-
   const pickShowByNameOrRandomly = (random, name='') => {
-    setError('')
+    clearErrors()
 
     let endpoint = !random && name.length ? `https://api.tvmaze.com/singlesearch/shows?q=${name}&embed=episodes` :
-    `https://api.tvmaze.com/shows/${randomNumber()}?embed=episodes`
+    `https://api.tvmaze.com/shows/${helpers.randomNumber()}?embed=episodes`
 
     return axios.get(endpoint)
       .then(res => {
@@ -84,17 +94,22 @@ function App() {
         setShow({...show, id, name, genres, premiered, summary, image, loaded: true})
 
         let episodes = res.data._embedded.episodes
-        let seasonArray = createSeasonArray(episodes)
+        let seasonArray = helpers.createSeasonArray(episodes)
 
         setEpisodes(episodes)
         handleTotalEpisodesWithSeasons(1, episodes)
         setTotalSeasons(seasonArray)
       })
-      .catch(err => console.log(err))
+      .catch(err => {
+        if (err.response && err.response.data.name === 'Not Found') {
+          handleTypeError('pageError', 'Oops something went wrong, refresh and try again')
+        }
+
+      })
   }
 
   const handleSearchChange = (e) => {
-    setError('')
+    clearErrors()
     setSearchedName(e.target.value)
   }
 
@@ -116,7 +131,17 @@ function App() {
   }
 
 
-  if (!show.name) return <Loader />
+  if (!show.name) {
+    if (!pageError.length) {
+      return <Loader />
+    } else {
+      return (
+        <Alert className='page-error' variant='danger'>
+          {pageError}
+        </Alert>
+      )
+    }
+  }
 
   return (
     <div className="container">
@@ -131,9 +156,9 @@ function App() {
         replaceEpisode={replaceEpisode}
         currentEpisode={currentEpisode}
         currentSeason={currentSeason}
-        error={error}
-        setError={setError}
-
+        error={replaceSearchError}
+        handleTypeError={handleTypeError}
+        clearErrors={clearErrors}
       />
       <SeasonList episodes={episodes}/>
     </div>

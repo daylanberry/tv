@@ -18,9 +18,10 @@ const DisplayShow = ({show: {name, genres, premiered, summary, image}}) => {
 
   return (
     <div className='show-container'>
-      <div className='main-img'>
+      <div >
         <img
           src={image && image.medium ? image.medium: naImage}
+          className='main-img'
         />
       </div>
       <div className='show-info'>

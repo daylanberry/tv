@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Alert } from 'react-bootstrap';
 import './ReplaceShow.styles.css';
 
 import axios from 'axios';
 
-const ReplaceShow = ({handleSeasonChange, handleEpisodesChange, totalSeasons, totalEpisodes, replaceEpisode, currentEpisode, currentSeason, error, setError}) => {
+const ReplaceShow = ({handleSeasonChange, handleEpisodesChange, totalSeasons, totalEpisodes, replaceEpisode, currentEpisode, currentSeason, error, handleTypeError, clearErrors}) => {
 
   const [replacement, setReplacement] = useState('')
 
   const handleReplacementChange = (e) => {
-    setError('')
+    clearErrors()
     setReplacement(e.target.value)
   }
 
@@ -46,13 +46,13 @@ const ReplaceShow = ({handleSeasonChange, handleEpisodesChange, totalSeasons, to
         ))
 
         if (!replacementEpisode) {
-          return setError('There is no matching season/episode for this show')
+          return handleTypeError('replaceSearchError', 'There is no matching season/episode for this show')
         }
 
         replaceEpisode(replacementEpisode)
       })
         .catch(err => {
-          setError(`There is no show matching for ${replacement}`)
+          handleTypeError('replaceSearchError', `There is no show matching for ${replacement}`)
           setReplacement('')
         })
 
@@ -92,7 +92,9 @@ const ReplaceShow = ({handleSeasonChange, handleEpisodesChange, totalSeasons, to
           Replace
         </Button>
       </Form>
-      {error.length > 0 && <p >{error}</p>}
+      {error.length > 0 && (
+        <Alert variant='danger'>{error}</Alert>
+      )}
     </div>
   )
 }
