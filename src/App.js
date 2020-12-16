@@ -130,7 +130,7 @@ function App() {
     setEpisodes(updatedEpisodes)
   }
 
-
+// if the api call does not populate a valid id, the site will prompt the user to refresh
   if (!show.name) {
     if (!pageError.length) {
       return <Loader />
